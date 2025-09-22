@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from bot.handlers.handler import router
 from database import db as database
 
-load_dotenv('.env')
+load_dotenv()
 
 dp = Dispatcher()
 

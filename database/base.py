@@ -114,7 +114,10 @@ class AbstractClass:
 
 class BaseModel(AbstractClass, Base):
     __abstract__ = True
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+
+    def __str__(self):
+        return f"{self.id}"
 
 
 class TimeBasedModel(BaseModel):
