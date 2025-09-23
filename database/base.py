@@ -124,3 +124,8 @@ class TimeBasedModel(BaseModel):
     __abstract__ = True
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(), onupdate=datetime.now())
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
+
+
+class BaseTimeModel(TimeBasedModel):
+    __abstract__ = True
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
