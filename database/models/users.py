@@ -38,6 +38,7 @@ class Lead(BaseTimeModel):
     class Status(Enum):
         SOLD = "sold"
         NOT_SOLD = "not_sold"
+        CANT_BUY = "cant_buy"
 
     visit_by: Mapped[str] = mapped_column(VARCHAR(100), nullable=True)
     lead_id: Mapped[int] = mapped_column(INTEGER, nullable=True)
