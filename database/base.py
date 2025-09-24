@@ -104,7 +104,8 @@ class AbstractClass:
     async def filter(cls, **kwargs):
         conditions = [getattr(cls, key) == value for key, value in kwargs.items()]
         query = select(cls).where(and_(*conditions))
-        return (await db.execute(query)).scalars()
+        result = await db.execute(query)
+        return result.scalars().all()
 
     async def save_model(self):
         db.add(self)
