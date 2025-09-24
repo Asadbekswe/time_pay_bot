@@ -24,6 +24,7 @@ class SuperUserButtons:
     pass
 
 
+
 def request_contact_user():
     rkb = ReplyKeyboardBuilder()
     rkb.add(KeyboardButton(text=UserRegister.REQUEST_CONTACT, request_contact=True))

@@ -12,21 +12,11 @@ from bot.handlers.admins import admin_router
 from bot.handlers.operators import operator_router
 from bot.handlers.super_users import super_user_router
 from bot.handlers.users import user_router
-from database import db as database
+from utils import on_startup, on_shutdown
 
 load_dotenv()
 
 dp = Dispatcher()
-
-
-async def on_startup():
-    logging.info("Starting up...")
-    await database.create_all()
-
-
-async def on_shutdown(bot: Bot):
-    # await database.drop_all()
-    await bot.delete_my_commands()
 
 
 async def main() -> None:
