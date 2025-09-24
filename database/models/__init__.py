@@ -1,2 +1,1 @@
-from database.models.users import User,get_session
-
+from database.models.users import User

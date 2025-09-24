@@ -3,14 +3,13 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from bot.filters.base_filter import IsUser
 from bot.keyboards.reply import request_contact_user
 from bot.states.users import UserState
 from database import User
 
 user_router = Router()
-user_router.message.filter(IsUser())
-user_router.callback_query.filter(IsUser())
+# user_router.message.filter(IsUser())
+# user_router.callback_query.filter(IsUser())
 
 
 @user_router.message(CommandStart())

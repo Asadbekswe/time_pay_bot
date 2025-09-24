@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from sqlalchemy import Enum as SQLEnum, INTEGER, ForeignKey, DateTime, BigInteger
+from sqlalchemy import Enum as SQLEnum, INTEGER, ForeignKey, DateTime
 from sqlalchemy import VARCHAR
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
@@ -20,12 +20,12 @@ class User(TimeBasedModel):
     last_name: Mapped[Optional[str]] = mapped_column(VARCHAR(100), nullable=True)
     phone_number: Mapped[Optional[str]] = mapped_column(VARCHAR(25), nullable=True)
     username: Mapped[Optional[str]] = mapped_column(VARCHAR(100), nullable=True)
-    telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False)
     type: Mapped[Type] = mapped_column(SQLEnum(Type), default=Type.USER)
     meetings: Mapped[list["Meeting"]] = relationship("Meeting", back_populates="operator")
     leads: Mapped[list["Lead"]] = relationship("Lead", back_populates="user", foreign_keys="Lead.user_id")
     operated_leads: Mapped[list["Lead"]] = relationship("Lead", back_populates="operator",
                                                         foreign_keys="Lead.operator_id")
+
 
 class Comment(BaseTimeModel):
     lead_id: Mapped[int] = mapped_column(ForeignKey("leads.id"), unique=True)
