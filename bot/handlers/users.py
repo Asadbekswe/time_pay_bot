@@ -1,8 +1,8 @@
 from aiogram import F
 from aiogram import html, Router
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardRemove
 
 from bot.filters.base_filter import IsUser
 from bot.keyboards.reply import request_contact_user
@@ -14,7 +14,7 @@ user_router = Router()
 
 @user_router.message(CommandStart())
 async def command_start_handler(message: Message, state: FSMContext, command: CommandStart) -> None:
-    # param = command.deep_link
+    param = command.args
     user_data = message.from_user.model_dump(include={'id', 'first_name', 'last_name', 'username'})
     existing_user = await User.get(_id=user_data['id'])
 
@@ -39,4 +39,14 @@ async def user_request_contact_handler(message: Message, state: FSMContext) -> N
     phone_number = message.contact.phone_number[-9:]
     await state.update_data(phone_number=phone_number)
     await User.update(_id=message.from_user.id, phone_number=phone_number)
-    await message.reply("Tez orada Operatorlarimiz siz bilan Bog'lanishadi ✅ !!!")
+    await message.reply("Tez orada Operatorlarimiz siz bilan Bog'lanishadi ✅ !!!", reply_markup=ReplyKeyboardRemove())
+
+
+@user_router.message(Command("request_operator"))
+async def request_operator(message: Message):
+    await message.answer("Siz operator bo‘lish uchun ariza yubordingiz!")
+
+
+@user_router.message(Command("request_admin"))
+async def request_admin(message: Message):
+    await message.answer("Siz admin bo‘lish uchun ariza yubordingiz!")
