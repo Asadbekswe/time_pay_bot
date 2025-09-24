@@ -2,7 +2,7 @@ from aiogram import F, Bot
 from aiogram import html, Router
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
+from aiogram.types import Message, ReplyKeyboardRemove
 
 from bot.filters.base_filter import IsUser
 from bot.keyboards.keyboard import request_operator_keyboard
@@ -44,14 +44,14 @@ async def user_request_contact_handler(message: Message, state: FSMContext) -> N
 
 
 @user_router.message(Command("request_operator"))
-async def request_operator(message: Message, bot: Bot, state: FSMContext) -> None:
+async def request_operator(message: Message, bot: Bot) -> None:
     await message.answer("Siz operator bo‘lish uchun ariza yubordingiz!")
     admins = await User.filter(type=User.Type.ADMIN)
     user = await User.get(_id=message.from_user.id)
     text = (
-        f"F.I.SH : {message.from_user.first_name or message.from_user.last_name}\n"
-        f"username: @{message.from_user.username or None}\n"
-        f"Tel : +998{user.phone_number or None}\n"
+        f"FISH : {user.first_name + user.last_name}\n"
+        f"username: @{user.username if user.username else "🤷🏻"}\n"
+        f"Tel : +998{user.phone_number}\n"
     )
     try:
         for admin in admins:
@@ -62,9 +62,6 @@ async def request_operator(message: Message, bot: Bot, state: FSMContext) -> Non
             )
     except:
         print()
-
-
-
 
 
 @user_router.message(Command("request_admin"))
