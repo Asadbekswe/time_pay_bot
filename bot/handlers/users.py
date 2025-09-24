@@ -1,10 +1,11 @@
-from aiogram import F
+from aiogram import F, Bot
 from aiogram import html, Router
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 
 from bot.filters.base_filter import IsUser
+from bot.keyboards.keyboard import request_operator_keyboard
 from bot.keyboards.reply import request_contact_user
 from bot.states.users import UserState
 from database import User, Lead
@@ -43,8 +44,27 @@ async def user_request_contact_handler(message: Message, state: FSMContext) -> N
 
 
 @user_router.message(Command("request_operator"))
-async def request_operator(message: Message):
+async def request_operator(message: Message, bot: Bot, state: FSMContext) -> None:
     await message.answer("Siz operator bo‘lish uchun ariza yubordingiz!")
+    admins = await User.filter(type=User.Type.ADMIN)
+    user = await User.get(_id=message.from_user.id)
+    text = (
+        f"F.I.SH : {message.from_user.first_name or message.from_user.last_name}\n"
+        f"username: @{message.from_user.username or None}\n"
+        f"Tel : +998{user.phone_number or None}\n"
+    )
+    try:
+        for admin in admins:
+            await bot.send_message(
+                admin.id,
+                text=text,
+                reply_markup=request_operator_keyboard(user_id=user.id),
+            )
+    except:
+        print()
+
+
+
 
 
 @user_router.message(Command("request_admin"))

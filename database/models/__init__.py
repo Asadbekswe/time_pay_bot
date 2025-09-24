@@ -1,1 +1,4 @@
-from database.models.users import User, Lead
+from database.models.users import User
+from database.models.leads import Lead
+from database.models.comments import Comment
+from database.models.meetings import Meeting
