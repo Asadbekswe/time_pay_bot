@@ -3,15 +3,19 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from bot.filters.base_filter import IsUser
 from bot.keyboards.reply import request_contact_user
 from bot.states.users import UserState
 from database import User
 
 user_router = Router()
+user_router.message.filter(IsUser())
+user_router.callback_query.filter(IsUser())
 
 
 @user_router.message(CommandStart())
-async def command_start_handler(message: Message, state: FSMContext) -> None:
+async def command_start_handler(message: Message, state: FSMContext, command: CommandStart) -> None:
+    # param = command.deep_link
     user_data = message.from_user.model_dump(include={'id', 'first_name', 'last_name', 'username'})
     existing_user = await User.get(_id=user_data['id'])
 
