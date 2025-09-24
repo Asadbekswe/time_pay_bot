@@ -1,15 +1,15 @@
-from aiogram import html, F, Router
+from aiogram import F
+from aiogram import html, Router
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from bot.filters.base_filter import IsUser
 from bot.keyboards.reply import request_contact_user
 from bot.states.users import UserState
 from database import User
 
 user_router = Router()
-# user_router.message.filter(IsUser())
-# user_router.callback_query.filter(IsUser())
 
 
 @user_router.message(CommandStart())
@@ -28,6 +28,10 @@ async def command_start_handler(message: Message, state: FSMContext, command: Co
     await state.set_state(UserState.phone_number)
     await message.answer(f"Assalomu aleykum 👋🏻, {html.bold(message.from_user.full_name)}!",
                          reply_markup=request_contact_user())
+
+
+user_router.message.filter(IsUser())
+user_router.callback_query.filter(IsUser())
 
 
 @user_router.message(F.contact, UserState.phone_number)
