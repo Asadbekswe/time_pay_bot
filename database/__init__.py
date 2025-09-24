@@ -1,2 +1,2 @@
-from database.base import db, TimeBasedModel,Base
-from database.models import User
+from database.base import db, TimeBasedModel, Base
+from database.models import User, Lead

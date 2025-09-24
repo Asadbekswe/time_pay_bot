@@ -5,9 +5,11 @@ from database import User
 
 
 class IsUser(Filter):
-
     async def __call__(self, message: Message) -> bool:
-        user = await User.get(message.from_user.id)
+        data = message.from_user.model_dump(include={"id", "first_name", "last_name", "username"})
+        user = await User.get(data["id"])
+        if not user:
+            user = await User.create(**data)
         return user.type == User.Type.USER
 
 
