@@ -49,7 +49,7 @@ async def request_operator(message: Message, bot: Bot) -> None:
     admins = await User.filter(type=User.Type.ADMIN)
     user = await User.get(_id=message.from_user.id)
     text = (
-        f"FISH : {user.first_name + user.last_name}\n"
+        f"FISH : {user.first_name or user.last_name}\n"
         f"username: @{user.username if user.username else "🤷🏻"}\n"
         f"Tel : +998{user.phone_number}\n"
     )
@@ -65,5 +65,21 @@ async def request_operator(message: Message, bot: Bot) -> None:
 
 
 @user_router.message(Command("request_admin"))
-async def request_admin(message: Message):
+async def request_admin(message: Message, bot: Bot) -> None:
     await message.answer("Siz admin bo‘lish uchun ariza yubordingiz!")
+    super_users = await User.filter(type=User.Type.SUPER_USER)
+    user = await User.get(_id=message.from_user.id)
+    text = (
+        f"FISH : {user.first_name or user.last_name}\n"
+        f"username: @{user.username if user.username else "🤷🏻"}\n"
+        f"Tel : +998{user.phone_number}\n"
+    )
+    try:
+        for super_user in super_users:
+            await bot.send_message(
+                super_user.id,
+                text=text,
+                reply_markup=request_operator_keyboard(user_id=user.id),
+            )
+    except:
+        print()
