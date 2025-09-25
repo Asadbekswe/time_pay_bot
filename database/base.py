@@ -101,9 +101,14 @@ class AbstractClass:
         return (await db.execute(select(cls))).scalars()
 
     @classmethod
-    async def filter(cls, **kwargs):
+    async def filter(cls, order_by=None, desc=False, **kwargs):
         conditions = [getattr(cls, key) == value for key, value in kwargs.items()]
         query = select(cls).where(and_(*conditions))
+
+        if order_by:
+            column = getattr(cls, order_by)
+            query = query.order_by(column.desc() if desc else column.asc())
+
         result = await db.execute(query)
         return result.scalars().all()
 

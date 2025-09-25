@@ -1,6 +1,13 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
+class OperatorLeadButtons:
+    COMMENT = "💬 Comment"
+    MEETING = "📅 Uchrashuv"
+    SOLD = "✅ Sotildi"
+    NOT_SOLD = "❌ Sotilmadi"
+
+
 def request_operator_keyboard(user_id: int):
     return InlineKeyboardMarkup(
         inline_keyboard=[
@@ -12,14 +19,14 @@ def request_operator_keyboard(user_id: int):
     )
 
 
-def lead_operator_keyboard(lead_id: int):
+def operator_lead_keyboard(lead_id: int):
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="Comment", callback_data=f"comment:{lead_id}"),
-                InlineKeyboardButton(text="Uchrashuv", callback_data=f"meeting:{lead_id}"),
-                InlineKeyboardButton(text="Sotildi", callback_data=f"sold:{lead_id}"),
-                InlineKeyboardButton(text="Sotilmadi", callback_data=f"no_sold:{lead_id}"),
+                InlineKeyboardButton(text=OperatorLeadButtons.COMMENT, callback_data=f"comment:{lead_id}"),
+                InlineKeyboardButton(text=OperatorLeadButtons.MEETING, callback_data=f"meeting:{lead_id}"),
+                InlineKeyboardButton(text=OperatorLeadButtons.SOLD, callback_data=f"sold:{lead_id}"),
+                InlineKeyboardButton(text=OperatorLeadButtons.NOT_SOLD, callback_data=f"not_sold:{lead_id}"),
             ]
 
         ]

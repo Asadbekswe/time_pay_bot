@@ -30,7 +30,7 @@ async def command_start_handler(message: Message, state: FSMContext, command: Co
         await state.set_state(UserState.phone_number)
 
         await message.answer(
-            f"👋 Assalomu aleykum, {html.bold(message.from_user.full_name)}!\n" f"📱 Telefon raqamingizni yuboring.",
+            f"👋🏻 Assalomu aleykum, {html.bold(message.from_user.full_name)}!\n" f"📱 Telefon raqamingizni yuboring.",
             reply_markup=request_contact_user()
         )
     else:
