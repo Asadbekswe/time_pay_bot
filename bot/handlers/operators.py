@@ -5,7 +5,6 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message
 
 from bot.filters.base_filter import IsOperator
-from bot.keyboards.keyboard import lead_operator_keyboard
 from bot.keyboards.reply import operator_btn, OperatorButtons
 from database import Lead, User
 from database.models import Meeting
@@ -15,15 +14,10 @@ operator_router.message.filter(IsOperator())
 operator_router.callback_query.filter(IsOperator())
 
 
-def limit(limit):
-    def decorator(func):
-        pass
-
-
 @operator_router.message(CommandStart())
 async def lead_handler(message: Message) -> None:
     await message.answer(
-        f"<blockquote>{message.from_user.full_name}</blockquote> <i><b>Assalomu aleykum, bugungi aloqalarda </b></i><tg-spoiler> OMAD !!! </tg-spoiler>",
+        f"<blockquote>{message.from_user.full_name}</blockquote> <i><b>Assalomu aleykum, bugungi aloqalarda </b><tg-spoiler> OMAD !!! </tg-spoiler></i>",
         reply_markup=operator_btn())
 
 
@@ -42,7 +36,7 @@ async def my_leads_handler(message: Message) -> None:
         await message.answer(text)
 
 
-@operator_router.message(F.text == OperatorButtons.MEETING)
+@operator_router.message(F.text == OperatorButtons.MEETINGS)
 async def meeting_handler(message: Message, bot: Bot) -> None:
     meetings = await Meeting.filter(meeting_id=message.from_user.id)
 

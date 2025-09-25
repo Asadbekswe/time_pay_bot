@@ -1,32 +1,4 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
-
-
-def contact_keyboard():
-    return ReplyKeyboardMarkup(
-        keyboard=[
-            [
-                KeyboardButton(
-                    text="📞 Telefon raqamni yuborish",
-                    request_contact=True
-                )
-            ]
-        ],
-        resize_keyboard=True,
-        one_time_keyboard=True
-    )
-
-
-def lead_keyboard():
-    return ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(
-                text="YANGI LEAD",
-            )
-            ]
-        ],
-        resize_keyboard=True,
-        one_time_keyboard=True
-    )
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 def request_operator_keyboard(user_id: int):
@@ -52,12 +24,3 @@ def lead_operator_keyboard(lead_id: int):
 
         ]
     )
-
-# def meeting_operator_keyboard(meeting_id: int):
-#     return InlineKeyboardMarkup(
-#         inline_keyboard=[
-#             [
-#                 InlineKeyboardButton(text)
-#             ]
-#         ]
-#     )

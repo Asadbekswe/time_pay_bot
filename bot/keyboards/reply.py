@@ -12,12 +12,15 @@ class UserButtons:
 
 class OperatorButtons:
     MY_LEADS = "Mening Leadlarim 📌"
-    MEETING = "Uchrashuv 🔄"
+    MEETINGS = "Uchrashuvlar ⏰"
     NEED_LEADS = "Lead Kerak 📥"
 
 
 class AdminButtons:
-    pass
+    USERS = "Foydalanuvchilar 🧍🏻🧍🏻‍♀️"
+    OPERATORS = "Operatorlar 👥"
+    ADMINS = "Adminlar 😎"
+    SUPER_USER = "BOSS 👑"
 
 
 class SuperUserButtons:
@@ -32,6 +35,15 @@ def request_contact_user():
 
 def operator_btn():
     rkb = ReplyKeyboardMarkup(keyboard=[
-        [KeyboardButton(text=OperatorButtons.MY_LEADS), KeyboardButton(text=OperatorButtons.MEETING),
+        [KeyboardButton(text=OperatorButtons.MY_LEADS), KeyboardButton(text=OperatorButtons.MEETINGS),
          KeyboardButton(text=OperatorButtons.NEED_LEADS)]], resize_keyboard=True)
+    return rkb
+
+
+def admin_btn():
+    rkb = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text=AdminButtons.USERS), KeyboardButton(text=AdminButtons.OPERATORS),
+             KeyboardButton(text=AdminButtons.ADMINS), KeyboardButton(text=AdminButtons.SUPER_USER)]],
+        resize_keyboard=True)
     return rkb

@@ -18,21 +18,26 @@ user_router.callback_query.filter(IsUser())
 
 @user_router.message(CommandStart())
 async def command_start_handler(message: Message, state: FSMContext, command: CommandStart) -> None:
-    param = command.args
+    param = command.args or "telegram"
 
-    if param:
+    lead = await Lead.filter(user_id=message.from_user.id, status=Lead.Status.NEW_LEAD)
+
+    if not lead:
         await Lead.create(
             visit_by=param,
             user_id=message.from_user.id,
         )
-    else:
-        await Lead.create(
-            visit_by="telegram",
-            user_id=message.from_user.id,
+        await state.set_state(UserState.phone_number)
+
+        await message.answer(
+            f"👋 Assalomu aleykum, {html.bold(message.from_user.full_name)}!\n" f"📱 Telefon raqamingizni yuboring.",
+            reply_markup=request_contact_user()
         )
-    await state.set_state(UserState.phone_number)
-    await message.answer(f"Assalomu aleykum 👋🏻, {html.bold(message.from_user.full_name)}!",
-                         reply_markup=request_contact_user())
+    else:
+        text = f"""⏳ Sizga tez orada aloqaga chiqamiz!\
+        🙏 Keltirilgan muammolar uchun uzur so‘raymiz, {html.bold(message.from_user.full_name)}!\n
+        🤝 <b>Hurmat bilan TimePay jamoasi!</b>"""
+        await message.answer(text)
 
 
 @user_router.message(F.contact, UserState.phone_number)
@@ -40,7 +45,8 @@ async def user_request_contact_handler(message: Message, state: FSMContext) -> N
     phone_number = message.contact.phone_number[-9:]
     await state.update_data(phone_number=phone_number)
     await User.update(_id=message.from_user.id, phone_number=phone_number)
-    await message.reply("Tez orada Operatorlarimiz siz bilan Bog'lanishadi ✅ !!!", reply_markup=ReplyKeyboardRemove())
+    await message.reply("Tez orada Operatorlarimiz siz bilan Bog'lanishadi ✅ !!!",
+                        reply_markup=ReplyKeyboardRemove())
 
 
 @user_router.message(Command("request_operator"))
