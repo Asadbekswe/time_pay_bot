@@ -1,13 +1,13 @@
 import datetime
 from datetime import datetime
 
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 
-from bot.filters.base_filter import IsOperator
-from bot.keyboards.keyboard import operator_lead_keyboard
+from bot.filters.base_filter import IsOperator, first_id_or_none
+from bot.keyboards.keyboard import operator_lead_keyboard, meeting_operator_keyboard
 from bot.keyboards.reply import operator_btn, OperatorButtons
 from bot.states.users import OperatorCommentState, OperatorMeetingState
 from database import Lead, User
@@ -65,7 +65,7 @@ async def meeting_handler(message: Message) -> None:
             f"🏠 <b>Manzil:</b> {meeting.address}\n"
             "-------------------------"
         )
-        await message.answer(text)
+        await message.answer(text, reply_markup=meeting_operator_keyboard(meeting.lead_id))
 
 
 @operator_router.message(F.text == OperatorButtons.NEED_LEADS)
@@ -197,9 +197,34 @@ async def operator_lead_meeting_address(message: Message, state: FSMContext) -> 
 
 @operator_router.callback_query(F.data.startswith("sold:"))
 async def operator_lead_sold(callback: CallbackQuery) -> None:
-    pass
+    meeting_id = int(callback.data.split(":")[1])
+    print(meeting_id)
+    if meeting_id:
+        lead = await Lead.get(meeting_id)
+        lead.status = Lead.Status.SOLD
+        await lead.commit()
+        meeting = await Meeting.filter(lead_id=lead.id)
+        meeting_id = await first_id_or_none(meeting)
+        print(meeting_id)
+        if meeting:
+            await Meeting.delete(meeting_id)
+
+        await callback.message.edit_text("✅ Tabriklaymiz, lead SOLD bo‘ldi.")
+    else:
+        await callback.message.answer("Meeting id not found.")
 
 
 @operator_router.callback_query(F.data.startswith("not_sold:"))
 async def operator_lead_not_sold(callback: CallbackQuery) -> None:
-    pass
+    meeting_id = int(callback.data.split(":")[1])
+    if meeting_id:
+        lead = await Lead.get(meeting_id)
+        lead.status = Lead.Status.SOLD
+        await lead.commit()
+        meeting = await Meeting.filter(lead_id=lead.id)
+        meeting_id = await first_id_or_none(meeting)
+        if meeting:
+            await Meeting.delete(meeting_id)
+        await callback.message.edit_text("😥")
+    else:
+        await callback.message.answer("Meeting id not found.")

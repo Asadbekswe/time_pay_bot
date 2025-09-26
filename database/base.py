@@ -118,6 +118,8 @@ class AbstractClass:
         return self
 
 
+
+
 class BaseModel(AbstractClass, Base):
     __abstract__ = True
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
