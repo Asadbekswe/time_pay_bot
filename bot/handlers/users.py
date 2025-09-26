@@ -1,5 +1,5 @@
 from aiogram import F, Bot
-from aiogram import html, Router
+from aiogram import Router
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
@@ -30,12 +30,12 @@ async def command_start_handler(message: Message, state: FSMContext, command: Co
         await state.set_state(UserState.phone_number)
 
         await message.answer(
-            f"👋🏻 Assalomu aleykum, {html.bold(message.from_user.full_name)}!\n" f"📱 Telefon raqamingizni yuboring.",
+            f"👋🏻 Assalomu aleykum, <b>{message.from_user.full_name}</b>!\n" f"📱 Telefon raqamingizni yuboring.",
             reply_markup=request_contact_user()
         )
     else:
         text = f"""⏳ Sizga tez orada aloqaga chiqamiz!\
-        🙏 Keltirilgan muammolar uchun uzur so‘raymiz, {html.bold(message.from_user.full_name)}!\n
+        🙏 Keltirilgan muammolar uchun uzur so‘raymiz, <b>{message.from_user.full_name}</b>!\n
         🤝 <b>Hurmat bilan TimePay jamoasi!</b>"""
         await message.answer(text)
 
@@ -51,41 +51,47 @@ async def user_request_contact_handler(message: Message, state: FSMContext) -> N
 
 @user_router.message(Command("request_operator"))
 async def request_operator(message: Message, bot: Bot) -> None:
-    await message.answer("Siz operator bo‘lish uchun ariza yubordingiz!")
+    await message.answer("📨 Siz operator bo‘lish uchun ariza yubordingiz!")
+
     admins = await User.filter(type=User.Type.ADMIN)
     user = await User.get(_id=message.from_user.id)
+
     text = (
-        f"FISH : {user.first_name or user.last_name}\n"
-        f"username: @{user.username if user.username else "🤷🏻"}\n"
-        f"Tel : +998{user.phone_number}\n"
+        f"👤 FISH: {user.first_name or ''} {user.last_name or ''}\n"
+        f"📛 Username: @{user.username if user.username else '🤷🏻'}\n"
+        f"📱 Tel: +998{user.phone_number}\n"
     )
-    try:
-        for admin in admins:
+
+    for admin in admins:
+        try:
             await bot.send_message(
                 admin.id,
                 text=text,
                 reply_markup=request_operator_keyboard(user_id=user.id),
             )
-    except:
-        print()
+        except Exception as e:
+            print(f"❌ Xatolik: {e}")
 
 
 @user_router.message(Command("request_admin"))
 async def request_admin(message: Message, bot: Bot) -> None:
-    await message.answer("Siz admin bo‘lish uchun ariza yubordingiz!")
+    await message.answer("✅ Siz admin bo‘lish uchun ariza yubordingiz!")
+
     super_users = await User.filter(type=User.Type.SUPER_USER)
     user = await User.get(_id=message.from_user.id)
+
     text = (
-        f"FISH : {user.first_name or user.last_name}\n"
-        f"username: @{user.username if user.username else "🤷🏻"}\n"
-        f"Tel : +998{user.phone_number}\n"
+        f"👤 FISH: {user.first_name or ''} {user.last_name or ''}\n"
+        f"📛 Username: @{user.username if user.username else '🤷🏻'}\n"
+        f"📱 Tel: +998{user.phone_number}\n"
     )
-    try:
-        for super_user in super_users:
+
+    for super_user in super_users:
+        try:
             await bot.send_message(
                 super_user.id,
                 text=text,
                 reply_markup=request_operator_keyboard(user_id=user.id),
             )
-    except:
-        print()
+        except Exception as e:
+            print(f"❌ Xatolik: {e}")
