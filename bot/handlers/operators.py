@@ -60,7 +60,7 @@ async def meeting_handler(message: Message) -> None:
 
         text = (
             f"📌 <b>LEAD ID:</b> {meeting.lead_id}\n"
-            f"👤 <b>Foydalanuvchi:</b> {user.first_name} {user.last_name}\n"
+            f"👤 <b>Foydalanuvchi:</b> {user.first_name if user.first_name else ""} {user.last_name if user.last_name else ""}\n"
             f"📅 <b>Sana:</b> <code>{meeting.meeting_date.strftime('%d.%m.%Y - %H:%M')}</code>\n"
             f"🏠 <b>Manzil:</b> {meeting.address}\n"
             "-------------------------"
