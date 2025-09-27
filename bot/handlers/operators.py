@@ -1,7 +1,7 @@
-import datetime
 from datetime import datetime
 
-from aiogram import Router, F, Bot
+from aiogram import Router, F
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
@@ -12,6 +12,7 @@ from bot.keyboards.reply import operator_btn, OperatorButtons
 from bot.states.users import OperatorCommentState, OperatorMeetingState
 from database import Lead, User
 from database.models import Meeting, Comment
+from aiogram_calendar import SimpleCalendar, SimpleCalendarCallback
 
 operator_router = Router()
 operator_router.message.filter(IsOperator())
@@ -39,7 +40,7 @@ async def my_leads_handler(message: Message) -> None:
         text = (
             f"🆔 Lead ID: {lead.id}\n"
             f"📌 Holati: {lead.status.value}\n"
-            f"👤 Foydalanuvchi: {user.first_name} {user.last_name}\n"
+            f"👤 Foydalanuvchi: {user.first_name or user.last_name}\n"
             f"📞 Telefon: +998{user.phone_number}\n"
             f"💬 Username: {"@" + user.username if user.username else '🤷🏻'}"
         )
@@ -88,7 +89,6 @@ async def need_leads_handler(message: Message) -> None:
         operator_id=None,
         order_by="id"
     )
-
     if not unassigned_leads:
         await message.answer("📭 Hozircha yangi lead mavjud emas.")
         return
@@ -100,7 +100,7 @@ async def need_leads_handler(message: Message) -> None:
         await lead.commit()
 
     await message.answer(
-        f"📅 {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+        f"📅 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
         f"🎉 {len(leads_to_assign)} ta lead sizga biriktirildi! Endi u Mening Leadlarimda ⬅️\n"
         f"👤 Operator: {operator.first_name if operator.first_name else ""} {operator.last_name if operator.last_name else ""}"
     )
@@ -134,42 +134,52 @@ async def operator_lead_create_meeting(callback: CallbackQuery, state: FSMContex
         lead_id=lead_id,
         operator_id=callback.from_user.id
     )
-    await state.set_state(OperatorMeetingState.meeting_date)
 
     text = (
         "📅 <b>Ushbu Lead uchun uchrashuv sanasini kiriting!</b>\n\n"
-        "Format: <code>kun.oy.yil - soat:minut</code>\n"
-        "Masalan: <code>12.06.2025 - 14:00</code>\n"
         "⚠️ Faqat hozirgi yil yoki keyingi yil uchun ruxsat beriladi."
     )
     await callback.message.reply(text)
+    await callback.message.answer("Uchrashuv sanasi:\n(Misol: 16-01-2025)",
+                                  reply_markup=await SimpleCalendar().start_calendar())
+    await state.set_state(OperatorMeetingState.meeting_date)
 
 
-@operator_router.message(OperatorMeetingState.meeting_date)
-async def operator_lead_meeting_date(message: Message, state: FSMContext) -> None:
-    user_input = message.text.strip()
-    now = datetime.now()
-    current_year = now.year
-    next_year = current_year + 1
+@operator_router.callback_query(SimpleCalendarCallback.filter(), OperatorMeetingState.meeting_date)
+async def operator_lead_meeting_date(callback_query: CallbackQuery, callback_data: SimpleCalendarCallback,
+                                     state: FSMContext) -> None:
+    selected, date = await SimpleCalendar().process_selection(callback_query, callback_data)
+    if selected:
+        if date.strftime("%d.%m.%Y") >= datetime.today().strftime("%d.%m.%Y"):
+            await state.update_data(meeting_date=date)
+            await callback_query.message.answer(f"✅ Tanlangan sana: {date.strftime('%d-%m-%Y')}")
+            await callback_query.message.answer("Endi vaqtni kiriting (masalan: 14:00):")
+            await state.set_state(OperatorMeetingState.meeting_time)
+        else:
+            await callback_query.answer("⚠️ Faqat hozirgi yil yoki keyingi yil uchun ruxsat beriladi.")
+            await callback_query.message.answer("Uchrashuv sanasi:\n(Misol: 16-01-2025)",
+                                                reply_markup=await SimpleCalendar().start_calendar())
+            await state.set_state(OperatorMeetingState.meeting_date)
+    else:
+        await callback_query.answer("⚠️ Faqat hozirgi yil yoki keyingi yil uchun ruxsat beriladi.")
 
+
+@operator_router.message(OperatorMeetingState.meeting_time)
+async def operator_lead_meeting_time(message: Message, state: FSMContext) -> None:
+    meeting_time = message.text
+    print(meeting_time)
     try:
-        meeting_datetime = datetime.strptime(user_input, "%d.%m.%Y - %H:%M")
+        if isinstance(meeting_time, str):
+            meeting_time = datetime.strptime(meeting_time, "%H:%M").time()
+            await state.update_data(meeting_time=meeting_time)
+            await state.set_state(OperatorMeetingState.address)
+            await message.answer("🏠 Iltimos, uchrashuv manzilini kiriting!")
+        else:
+            await message.answer("")
     except ValueError:
-        await message.answer(
-            "⚠️ <b>Format noto‘g‘ri!</b> Iltimos, quyidagi formatda kiriting: "
-            "<code>12.06.2025 - 14:00</code>")
-        return
-
-    if meeting_datetime.year not in (current_year, next_year):
-        await message.answer(
-            f"⚠️ Faqat hozirgi yil (<b>{current_year}</b>) yoki keyingi yil (<b>{next_year}</b>) "
-            "uchun ruxsat beriladi. Qayta kiriting!")
-        return
-
-    await state.update_data(meeting_datetime=meeting_datetime)
-
-    await state.set_state(OperatorMeetingState.address)
-    await message.answer("🏠 Iltimos, uchrashuv manzilini kiriting!")
+        # noto'g'ri format kiritilgan bo'lsa
+        await message.answer("⚠️ Vaqt formati noto‘g‘ri! Masalan: 14:00 kiriting.")
+        await state.set_state(OperatorMeetingState.meeting_time)
 
 
 @operator_router.message(OperatorMeetingState.address)
@@ -179,8 +189,9 @@ async def operator_lead_meeting_address(message: Message, state: FSMContext) -> 
 
     lead_id = data.get("lead_id")
     operator_id = data.get("operator_id")
-    meeting_datetime = data.get("meeting_datetime")
-
+    meeting_date = data.get("meeting_date")
+    meeting_time = data.get("meeting_time")
+    meeting_datetime = datetime.combine(meeting_date, meeting_time)
     await Meeting.create(
         lead_id=lead_id,
         operator_id=operator_id,
@@ -219,7 +230,7 @@ async def operator_lead_not_sold(callback: CallbackQuery) -> None:
     meeting_id = int(callback.data.split(":")[1])
     if meeting_id:
         lead = await Lead.get(meeting_id)
-        lead.status = Lead.Status.SOLD
+        lead.status = Lead.Status.NOT_SOLD
         await lead.commit()
         meeting = await Meeting.filter(lead_id=lead.id)
         meeting_id = await first_id_or_none(meeting)
