@@ -15,4 +15,5 @@ class OperatorMeetingState(StatesGroup):
     lead_id = State()
     operator_id = State()
     meeting_date = State()
+    meeting_time = State()
     address = State()
