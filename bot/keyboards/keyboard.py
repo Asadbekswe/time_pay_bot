@@ -71,7 +71,7 @@ def meeting_operator_keyboard(meeting_id: int):
         inline_keyboard=[
             [
                 InlineKeyboardButton(text=OperatorLeadButtons.SOLD, callback_data=f"sold:{meeting_id}"),
-                InlineKeyboardButton(text=OperatorLeadButtons.NOT_SOLD, callback_data=f"no_sold:{meeting_id}"),
+                InlineKeyboardButton(text=OperatorLeadButtons.NOT_SOLD, callback_data=f"not_sold:{meeting_id}"),
 
             ]
         ]
