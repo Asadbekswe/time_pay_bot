@@ -1,10 +1,10 @@
 from datetime import datetime
 
 from aiogram import Router, F
-from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
+from aiogram_calendar import SimpleCalendar, SimpleCalendarCallback
 
 from bot.filters.base_filter import IsOperator, first_id_or_none
 from bot.keyboards.keyboard import operator_lead_keyboard, meeting_operator_keyboard
@@ -12,7 +12,6 @@ from bot.keyboards.reply import operator_btn, OperatorButtons
 from bot.states.users import OperatorCommentState, OperatorMeetingState
 from database import Lead, User
 from database.models import Meeting, Comment
-from aiogram_calendar import SimpleCalendar, SimpleCalendarCallback
 
 operator_router = Router()
 operator_router.message.filter(IsOperator())
@@ -220,7 +219,7 @@ async def operator_lead_sold(callback: CallbackQuery) -> None:
         if meeting:
             await Meeting.delete(meeting_id)
 
-        await callback.message.edit_text("✅ Tabriklaymiz, lead SOLD bo‘ldi.")
+        await callback.message.edit_text("✅ Tabriklaymiz, Lead ni sotibsiz !!!")
     else:
         await callback.message.answer("Meeting id not found.")
 
