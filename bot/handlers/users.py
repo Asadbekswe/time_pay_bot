@@ -34,9 +34,11 @@ async def command_start_handler(message: Message, state: FSMContext, command: Co
             reply_markup=request_contact_user()
         )
     else:
-        text = f"""⏳ Sizga tez orada aloqaga chiqamiz!\
-        🙏 Keltirilgan muammolar uchun uzur so‘raymiz, <b>{message.from_user.full_name}</b>!\n
-        🤝 <b>Hurmat bilan TimePay jamoasi!</b>"""
+        text = (
+            f"⏳ Tez orada siz bilan aloqaga chiqamiz!\n\n"
+            f"🙏 Keltirilgan noqulayliklar uchun uzr so‘raymiz, <b>{message.from_user.full_name}</b>.\n\n"
+            f"🤝 Hurmat bilan — <b>TimePay jamoasi</b>!"
+        )
         await message.answer(text)
 
 

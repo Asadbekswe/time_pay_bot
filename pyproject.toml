@@ -8,6 +8,7 @@ dependencies = [
     "aiogram-calendar>=0.6.0",
     "alembic>=1.16.5",
     "asyncpg>=0.30.0",
+    "inspirational-quotes>=0.0.16",
     "python-dotenv>=1.1.1",
     "sqlalchemy>=2.0.43",
 ]

@@ -1,17 +1,19 @@
 from datetime import datetime
 
+from aiogram import Bot
 from aiogram import Router, F
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
+from aiogram.types import CallbackQuery, Message
+from aiogram.types import ReplyKeyboardRemove
 from aiogram_calendar import SimpleCalendar, SimpleCalendarCallback
 
 from bot.filters.base_filter import IsOperator, first_id_or_none
-from bot.keyboards.keyboard import operator_lead_keyboard, meeting_operator_keyboard
-from bot.keyboards.reply import operator_btn, OperatorButtons
-from bot.states.users import OperatorCommentState, OperatorMeetingState
+from bot.keyboards.keyboard import operator_lead_keyboard, meeting_operator_keyboard, notes_create_delete
+from bot.keyboards.reply import operator_btn, OperatorButtons, NotesButtons, operator_notes_btn
+from bot.states.users import OperatorCommentState, OperatorMeetingState, OperatorNoteState
 from database import Lead, User
-from database.models import Meeting, Comment
+from database.models import Meeting, Comment, Note
 
 operator_router = Router()
 operator_router.message.filter(IsOperator())
@@ -166,7 +168,6 @@ async def operator_lead_meeting_date(callback_query: CallbackQuery, callback_dat
 @operator_router.message(OperatorMeetingState.meeting_time)
 async def operator_lead_meeting_time(message: Message, state: FSMContext) -> None:
     meeting_time = message.text
-    print(meeting_time)
     try:
         if isinstance(meeting_time, str):
             meeting_time = datetime.strptime(meeting_time, "%H:%M").time()
@@ -176,7 +177,6 @@ async def operator_lead_meeting_time(message: Message, state: FSMContext) -> Non
         else:
             await message.answer("")
     except ValueError:
-        # noto'g'ri format kiritilgan bo'lsa
         await message.answer("⚠️ Vaqt formati noto‘g‘ri! Masalan: 14:00 kiriting.")
         await state.set_state(OperatorMeetingState.meeting_time)
 
@@ -238,3 +238,126 @@ async def operator_lead_not_sold(callback: CallbackQuery) -> None:
         await callback.message.edit_text("😥")
     else:
         await callback.message.answer("Meeting id not found.")
+
+
+@operator_router.message(F.text == OperatorButtons.NOTES)
+async def operator_notes_handler(message: Message, bot: Bot) -> None:
+    await bot.delete_message(message.chat.id, message.message_id)
+    await message.answer(text=OperatorButtons.NOTES, reply_markup=operator_notes_btn())
+
+
+@operator_router.callback_query(F.data == NotesButtons.NOTES)
+async def operator_notes(callback: CallbackQuery) -> None:
+    notes = await Note.filter(operator_id=callback.from_user.id)
+    if not notes:
+        await callback.message.answer("📭 Sizda hali hech qanday eslatma yo‘q.", reply_markup=operator_notes_btn())
+        return
+
+    for idx, note in enumerate(notes, start=1):
+        text = (
+            f"📝 <b>Eslatma #{idx}</b>\n\n"
+            f"💡 {note.description}\n"
+            f"⏰ <i>{note.note_time.strftime('%Y-%m-%d %H:%M')}</i>")
+        await callback.message.answer(text=text, reply_markup=notes_create_delete(note.id))
+
+
+@operator_router.callback_query(F.data == NotesButtons.CREATE_NOTE)
+async def operator_note_create_handler(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+    await callback.message.reply("📝 Eslatma matnini kiriting")
+    await state.set_state(OperatorNoteState.note_description)
+
+
+@operator_router.message(OperatorNoteState.note_description)
+async def operator_note_description_handler(message: Message, state: FSMContext):
+    text = message.text.strip()
+    if not text:
+        await message.reply("⚠️ Matn bo‘sh bo‘lmasin. Iltimos, eslatma matnini kiriting.")
+        return
+
+    await state.update_data(description=text)
+    await message.answer("📅 Eslatma sanasini tanlang:", reply_markup=await SimpleCalendar().start_calendar())
+    await state.set_state(OperatorNoteState.note_date)
+
+
+@operator_router.callback_query(SimpleCalendarCallback.filter(), OperatorNoteState.note_date)
+async def operator_note_calendar_handler(callback: CallbackQuery, callback_data: SimpleCalendarCallback,
+                                         state: FSMContext):
+    await callback.answer()
+    selected, date_obj = await SimpleCalendar().process_selection(callback, callback_data)
+
+    if not selected:
+        await callback.message.answer("Sana tanlanmadi. Iltimos, sanani tanlang.")
+        return
+
+    today = datetime.now().date()
+    if date_obj.date() < today:
+        await callback.message.answer(
+            "⚠️ Kechagi yoki avvalgi sanani tanlab bo‘lmaydi. Iltimos, boshqa sana tanlang.",
+            reply_markup=await SimpleCalendar().start_calendar()
+        )
+        return
+
+    await state.update_data(note_date=date_obj)
+    await callback.message.answer(f"✅ Tanlangan sana: {date_obj.strftime('%d.%m.%Y')}")
+    await callback.message.answer("Endi vaqtni kiriting (masalan: 14:00):")
+    await state.set_state(OperatorNoteState.note_time)
+
+
+@operator_router.message(OperatorNoteState.note_time)
+async def operator_note_time_handler(message: Message, state: FSMContext):
+    txt = message.text.strip()
+    try:
+        time_obj = datetime.strptime(txt, "%H:%M").time()
+    except ValueError:
+        await message.answer("⚠️ Vaqt formati noto‘g‘ri. To‘g‘ri misol: 14:00")
+        return
+
+    data = await state.get_data()
+    description = data.get("description")
+    note_date = data.get("note_date")
+
+    if not description or not note_date:
+        await message.answer("⚠️ Kerakli ma'lumot topilmadi. Iltimos, eslatmani qayta yarating.")
+        await state.clear()
+        return
+
+    note_dt = datetime.combine(note_date, time_obj)
+
+    try:
+        await Note.create(
+            description=description,
+            note_time=note_dt,
+            operator_id=message.from_user.id
+        )
+    except Exception as e:
+        await message.answer(f"Xatolik: eslatma saqlanmadi.\n\n{e}")
+        await state.clear()
+        return
+
+    out = (
+        f"✅ Eslatma saqlandi\n\n"
+        f"📝 {description}\n"
+        f"⏰ {note_dt.strftime('%d.%m.%Y %H:%M')}"
+    )
+    await message.answer(out)
+
+    await state.clear()
+
+
+@operator_router.callback_query(F.data.startswith("note_delete"))
+async def operator_back(callback: CallbackQuery) -> None:
+    note_id = int(callback.data.split(":")[-1])
+
+    note = await Note.delete(note_id)
+    if not note:
+        await callback.message.reply("❌ Bunday eslatma topilmadi.")
+        return
+
+    await callback.message.reply("✅ Muvoffaqiyatli o‘chirildi")
+
+
+@operator_router.callback_query(F.data == NotesButtons.BACK)
+async def operator_back(callback: CallbackQuery, bot: Bot) -> None:
+    await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
+    await callback.message.answer(text="Asosiy Menu 📌", reply_markup=operator_btn())

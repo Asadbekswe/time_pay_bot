@@ -17,3 +17,9 @@ class OperatorMeetingState(StatesGroup):
     meeting_date = State()
     meeting_time = State()
     address = State()
+
+
+class OperatorNoteState(StatesGroup):
+    note_description = State()
+    note_date = State()
+    note_time = State()

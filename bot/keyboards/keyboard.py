@@ -41,6 +41,10 @@ class OperatorLeadButtons:
     NOT_SOLD = "❌ Sotilmadi"
 
 
+class OperatorNoteButtons:
+    DELETE = "O'chirish 🗑"
+
+
 def request_operator_keyboard(user_id: int):
     return InlineKeyboardMarkup(
         inline_keyboard=[
@@ -73,6 +77,17 @@ def meeting_operator_keyboard(meeting_id: int):
                 InlineKeyboardButton(text=OperatorLeadButtons.SOLD, callback_data=f"sold:{meeting_id}"),
                 InlineKeyboardButton(text=OperatorLeadButtons.NOT_SOLD, callback_data=f"not_sold:{meeting_id}"),
 
+            ]
+        ]
+    )
+
+
+def notes_create_delete(note_id):
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                # InlineKeyboardButton(text=" ✅", callback_data=f"acceptance:{user_id}"),
+                InlineKeyboardButton(text=OperatorNoteButtons.DELETE, callback_data=f"note_delete:{note_id}"),
             ]
         ]
     )

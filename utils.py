@@ -16,7 +16,7 @@ async def on_startup(bot: Bot):
     ]
     await bot.set_my_commands(commands=my_commands)
     logging.info("Starting up...")
-    await database.create_all()
+    # await database.create_all()
 
 
 async def on_shutdown(bot: Bot):

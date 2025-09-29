@@ -24,4 +24,4 @@ class User(TimeBasedModel):
     leads: Mapped[list["Lead"]] = relationship("Lead", back_populates="user", foreign_keys="Lead.user_id")
     operated_leads: Mapped[list["Lead"]] = relationship("Lead", back_populates="operator",
                                                         foreign_keys="Lead.operator_id")
-
+    notes: Mapped[list["Note"]] = relationship("Note", back_populates="user")
