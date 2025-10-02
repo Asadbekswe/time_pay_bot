@@ -4,10 +4,24 @@ from typing import Optional
 
 from sqlalchemy import BigInteger, DateTime, select, delete as sqlalchemy_delete, \
     update as sqlalchemy_update, inspect, and_
-from sqlalchemy.ext.asyncio import AsyncAttrs, create_async_engine, AsyncSession
-from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase, declared_attr, sessionmaker
-
+from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import mapped_column, Mapped, declared_attr, sessionmaker
+import os
 from config import conf
+
+# engine
+
+
+DB_USER: str = os.getenv("DB_USER")
+DB_PASS: str = os.getenv("DB_PASS")
+DB_HOST: str = os.getenv("DB_HOST")
+DB_PORT: int = os.getenv("DB_PORT")
+DB_NAME: str = os.getenv("DB_NAME")
+
+DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+engine = create_async_engine(DATABASE_URL, echo=True)
 
 
 class Base(AsyncAttrs, DeclarativeBase):
@@ -118,8 +132,6 @@ class AbstractClass:
         return self
 
 
-
-
 class BaseModel(AbstractClass, Base):
     __abstract__ = True
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -137,3 +149,15 @@ class TimeBasedModel(BaseModel):
 class BaseTimeModel(TimeBasedModel):
     __abstract__ = True
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+
+
+# Base
+class Base(DeclarativeBase):
+    pass
+
+
+# session factory
+async_session = async_sessionmaker(
+    engine, expire_on_commit=False
+)
+

@@ -1,7 +1,11 @@
+import datetime
+
 from aiogram.filters import Filter
 from aiogram.types import Message
+from sqlalchemy import select
 
-from database import User
+from database import User, Lead
+from database.base import async_session
 
 
 class IsUser(Filter):
@@ -40,15 +44,25 @@ class IsSuperUser(Filter):
 #         driver = await Driver.get_or_none(user_id=message.from_user.id)
 #         return driver is not None and driver.has_permission
 async def first_id_or_none(items: list):
-    """
-    Listning birinchi elementidan 'id' qiymatini qaytaradi.
-    Agar list bo'sh bo'lsa yoki 'id' bo'lmasa, None qaytaradi.
-    """
     if items and len(items) > 0:
         item = items[0]
-        # Agar bu dict bo'lsa (values qaytarilgan bo'lsa)
         if isinstance(item, dict):
             return item.get('id')
-        # Agar bu model bo'lsa (Tortoise yoki SQLAlchemy obyekti)
         return getattr(item, 'id', None)
     return None
+
+
+async def get_leads(operator_id, start_date, end_date):
+    async with async_session() as session:
+        async with session.begin():
+            stmt = (
+                select(Lead)
+                .where(
+                    Lead.operator_id == operator_id,
+                    Lead.status == Lead.Status.SOLD,
+                    Lead.updated_at >= start_date,
+                    Lead.updated_at < end_date
+                )
+            )
+            result = await session.execute(stmt)
+        return result.scalars().all()
