@@ -345,6 +345,8 @@ async def operator_note_time_handler(message: Message, state: FSMContext):
     await state.clear()
 
 
+
+
 @operator_router.callback_query(F.data.startswith("note_delete"))
 async def operator_back(callback: CallbackQuery) -> None:
     note_id = int(callback.data.split(":")[-1])
