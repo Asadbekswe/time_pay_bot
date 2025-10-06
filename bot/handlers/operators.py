@@ -1,6 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
-from aiogram import Bot
 from aiogram import Router, F
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
@@ -9,15 +8,17 @@ from aiogram.types import ReplyKeyboardRemove
 from aiogram_calendar import SimpleCalendar, SimpleCalendarCallback
 
 from bot.filters.base_filter import IsOperator, first_id_or_none
-from bot.keyboards.keyboard import operator_lead_keyboard, meeting_operator_keyboard, notes_create_delete
-from bot.keyboards.reply import operator_btn, OperatorButtons, NotesButtons, operator_notes_btn
-from bot.states.users import OperatorCommentState, OperatorMeetingState, OperatorNoteState
+from bot.keyboards.keyboard import operator_lead_keyboard, meeting_operator_keyboard
+from bot.keyboards.reply import operator_btn, OperatorButtons
+from bot.states.users import OperatorCommentState, OperatorMeetingState
 from database import Lead, User
 from database.models import Meeting, Comment, Note
 
 operator_router = Router()
 operator_router.message.filter(IsOperator())
 operator_router.callback_query.filter(IsOperator())
+
+UZBEK_TZ = timezone(timedelta(hours=5))
 
 
 @operator_router.message(CommandStart())
@@ -209,9 +210,11 @@ async def operator_lead_meeting_address(message: Message, state: FSMContext) -> 
 async def operator_lead_sold(callback: CallbackQuery) -> None:
     meeting_id = int(callback.data.split(":")[1])
     print(meeting_id)
+    now = datetime.now(UZBEK_TZ)
     if meeting_id:
         lead = await Lead.get(meeting_id)
         lead.status = Lead.Status.SOLD
+        lead.solt_date = now.replace(tzinfo=None)
         await lead.commit()
         meeting = await Meeting.filter(lead_id=lead.id)
         meeting_id = await first_id_or_none(meeting)
@@ -219,7 +222,7 @@ async def operator_lead_sold(callback: CallbackQuery) -> None:
         if meeting:
             await Meeting.delete(meeting_id)
 
-        await callback.message.edit_text("✅ Tabriklaymiz, Lead ni sotibsiz !!!")
+        await callback.message.edit_text("✅ Tabriklaymiz, lead Sotildi bo‘ldi.")
     else:
         await callback.message.answer("Meeting id not found.")
 
@@ -230,6 +233,7 @@ async def operator_lead_not_sold(callback: CallbackQuery) -> None:
     if meeting_id:
         lead = await Lead.get(meeting_id)
         lead.status = Lead.Status.NOT_SOLD
+
         await lead.commit()
         meeting = await Meeting.filter(lead_id=lead.id)
         meeting_id = await first_id_or_none(meeting)

@@ -4,8 +4,10 @@ from typing import Optional
 
 from sqlalchemy import BigInteger, DateTime, select, delete as sqlalchemy_delete, \
     update as sqlalchemy_update, inspect, and_
-from sqlalchemy.ext.asyncio import AsyncAttrs, create_async_engine, AsyncSession
-from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase, declared_attr, sessionmaker
+from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import mapped_column, Mapped, declared_attr, sessionmaker
 
 from config import conf
 
@@ -116,6 +118,8 @@ class AbstractClass:
         db.add(self)
         await self.commit()
         return self
+
+#salom ----------------------->
 
 
 

@@ -1,5 +1,6 @@
+from database.models.users import User
+from database.models.leads import Lead
 from database.models.comments import Comment
 from database.models.leads import Lead
 from database.models.meetings import Meeting
 from database.models.notes import Note
-from database.models.users import User
