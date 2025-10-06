@@ -119,7 +119,7 @@ class AbstractClass:
         await self.commit()
         return self
 
-
+#salom ----------------------->
 
 
 

@@ -51,17 +51,4 @@ async def first_id_or_none(items: list):
     return None
 
 
-# async def get_leads(operator_id, start_date, end_date):
-#     async with async_session() as session:
-#         async with session.begin():
-#             stmt = (
-#                 select(Lead)
-#                 .where(
-#                     Lead.operator_id == operator_id,
-#                     Lead.status == Lead.Status.SOLD,
-#                     Lead.updated_at >= start_date,
-#                     Lead.updated_at < end_date
-#                 )
-#             )
-#             result = await session.execute(stmt)
-#         return result.scalars().all()
+
