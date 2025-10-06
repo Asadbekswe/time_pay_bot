@@ -171,6 +171,7 @@ async def month_handler(callback_query: CallbackQuery) -> None:
     wb = Workbook()
     ws = wb.active
     ws.title = "Sotilgan Leadlar"
+    #salom----------------------------------
 
     ws.append(["ID", "User", "Phone", "Tarmoq", ])
 

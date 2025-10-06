@@ -206,6 +206,7 @@ async def operator_lead_meeting_address(message: Message, state: FSMContext) -> 
         f"📅 Sana: <code>{meeting_datetime.strftime('%d.%m.%Y - %H:%M')}</code>\n"
         f"🏠 Manzil: <b>{address}</b>")
     await state.clear()
+    #salom --------------------->
 
 
 @operator_router.callback_query(F.data.startswith("sold:"))

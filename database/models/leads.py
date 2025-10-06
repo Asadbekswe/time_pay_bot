@@ -7,7 +7,7 @@ from sqlalchemy import VARCHAR
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from database.base import TimeBasedModel, BaseTimeModel
-
+#salom ------------------>
 
 class Lead(BaseTimeModel):
     class Status(Enum):
