@@ -7,7 +7,7 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message, CallbackQuery, FSInputFile
 from openpyxl import Workbook
 
-from bot.filters.base_filter import IsAdmin, first_id_or_none, get_leads
+from bot.filters.base_filter import IsAdmin, first_id_or_none
 from bot.keyboards.keyboard import operator_list_keyboard, operator_keyboard, statistic_keyboard, OperatorButton
 from bot.keyboards.reply import admin_btn, AdminButtons
 from database import User, Lead
@@ -160,9 +160,10 @@ async def month_handler(callback_query: CallbackQuery) -> None:
     else:
         end_date = datetime(now.year, now.month + 1, 1)
 
-    # Leadlarni olish
-    leads = await get_leads(operator_id, start_date=start_date, end_date=end_date)
-
+    leads = await Lead.filter(operator_id=operator_id,
+                              status=Lead.Status.SOLD,
+                              sold_date__gte=start_date,
+                              sold_date__lte=end_date)
     if not leads:
         await callback_query.message.answer("Bu oyda sotilgan leadlar yo‘q.")
         return
