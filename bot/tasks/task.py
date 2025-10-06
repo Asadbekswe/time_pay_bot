@@ -17,17 +17,15 @@ async def reminder_worker(bot: Bot):
     while True:
         now = datetime.now(UZBEK_TZ)
 
-        # bitta so'rovda comment + lead ni yuklaymiz (joined eager load)
         result = await db.execute(select(Comment).options(joinedload(Comment.lead)))
         comments = result.scalars().all()
 
         due_comments = []
         for c in comments:
-            # agar sana yoki vaqt bo'lmasa — o'tkazib yubor
+
             if not c.reminder_date or not c.reminder_time:
                 continue
 
-            # reminder_date may be datetime or date
             rd = c.reminder_date
             if isinstance(rd, datetime):
                 rd_date = rd.date()
@@ -35,12 +33,11 @@ async def reminder_worker(bot: Bot):
                 rd_date = rd
 
             rt = c.reminder_time
-            # rt expected to be datetime.time (or time-like)
-            # birlashtiramiz va timezone qo'shamiz
+
             try:
                 reminder_dt = datetime.combine(rd_date, rt)
             except Exception:
-                # noto'g'ri format bo'lsa, o'tkazib yubor
+
                 continue
 
             if reminder_dt.tzinfo is None:
@@ -53,10 +50,9 @@ async def reminder_worker(bot: Bot):
 
         for comment, reminder_dt in due_comments:
             try:
-                # operator idni olamiz (lead orqali)
+
                 operator_id = getattr(comment.lead, "operator_id", None)
                 if not operator_id:
-                    # operator yo'q bo'lsa, yuborilmadi
                     await Comment.delete(comment.id)
                     continue
 
@@ -89,11 +85,10 @@ async def reminder_worker(bot: Bot):
 
                 await bot.send_message(operator_id, random.choice(messages), parse_mode="HTML")
 
-                # yuborilgach commentni o'chiramiz
                 await Comment.delete(comment.id)
 
             except Exception as e:
-                # loglash uchun print; kerak bo'lsa logger bilan almashtiring
+
                 print(f"Reminder error: {e}")
 
         await asyncio.sleep(60)

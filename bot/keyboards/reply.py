@@ -27,12 +27,6 @@ class SuperUserButtons:
     pass
 
 
-# class NotesButtons:
-#     NOTES = "Eslatmalarim 📝"
-#     CREATE_NOTE = "Eslatma yaratish 📅"
-#     BACK = "Orqaga qaytish ⬅️"
-
-
 def request_contact_user():
     rkb = ReplyKeyboardBuilder()
     rkb.add(KeyboardButton(text=UserRegister.REQUEST_CONTACT, request_contact=True))
@@ -49,16 +43,6 @@ def operator_btn():
 
 def admin_btn():
     rkb = ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text=AdminButtons.OPERATORS)]],
-        # KeyboardButton(text=AdminButtons.OPERATORS)]
-        # KeyboardButton(text=AdminButtons.ADMINS), KeyboardButton(text=AdminButtons.SUPER_USER)]],
+        keyboard=[[KeyboardButton(text=AdminButtons.OPERATORS)]],
         resize_keyboard=True)
     return rkb
-
-# def operator_notes_btn():
-#     ikb = InlineKeyboardMarkup(
-#         inline_keyboard=[[InlineKeyboardButton(text=NotesButtons.NOTES, callback_data=NotesButtons.NOTES),
-#                           InlineKeyboardButton(text=NotesButtons.CREATE_NOTE, callback_data=NotesButtons.CREATE_NOTE),
-#                           InlineKeyboardButton(text=NotesButtons.BACK, callback_data=NotesButtons.BACK)]])
-#     return ikb
