@@ -20,7 +20,7 @@ class Lead(BaseTimeModel):
     lead_id: Mapped[int] = mapped_column(INTEGER, nullable=True)
     status: Mapped[Status] = mapped_column(SQLEnum(Status), default=Status.NEW_LEAD)
     reminder_time: Mapped[datetime] = mapped_column(DateTime, nullable=True)
-    solt_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    sold_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     operator_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True)
 

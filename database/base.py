@@ -104,7 +104,28 @@ class AbstractClass:
 
     @classmethod
     async def filter(cls, order_by=None, desc=False, **kwargs):
-        conditions = [getattr(cls, key) == value for key, value in kwargs.items()]
+        conditions = []
+        for key, value in kwargs.items():
+            if '__' in key:
+                field, lookup = key.split('__', 1)
+                column = getattr(cls, field)
+                if lookup == 'gte':
+                    conditions.append(column >= value)
+                elif lookup == 'lte':
+                    conditions.append(column <= value)
+                elif lookup == 'gt':
+                    conditions.append(column > value)
+                elif lookup == 'lt':
+                    conditions.append(column < value)
+                elif lookup == 'ne':
+                    conditions.append(column != value)
+                elif lookup == 'in':
+                    conditions.append(column.in_(value))
+                else:
+                    raise ValueError(f"Unsupported lookup: {lookup}")
+            else:
+                conditions.append(getattr(cls, key) == value)
+
         query = select(cls).where(and_(*conditions))
 
         if order_by:
@@ -119,9 +140,8 @@ class AbstractClass:
         await self.commit()
         return self
 
-#salom ----------------------->
 
-
+# salom ----------------------->
 
 
 class BaseModel(AbstractClass, Base):

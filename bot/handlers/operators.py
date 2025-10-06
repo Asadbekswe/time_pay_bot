@@ -1,6 +1,6 @@
 from datetime import datetime, timezone, timedelta
 
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
@@ -8,9 +8,9 @@ from aiogram.types import ReplyKeyboardRemove
 from aiogram_calendar import SimpleCalendar, SimpleCalendarCallback
 
 from bot.filters.base_filter import IsOperator, first_id_or_none
-from bot.keyboards.keyboard import operator_lead_keyboard, meeting_operator_keyboard
-from bot.keyboards.reply import operator_btn, OperatorButtons
-from bot.states.users import OperatorCommentState, OperatorMeetingState
+from bot.keyboards.keyboard import operator_lead_keyboard, meeting_operator_keyboard, notes_create_delete
+from bot.keyboards.reply import operator_btn, OperatorButtons, operator_notes_btn, NotesButtons
+from bot.states.users import OperatorCommentState, OperatorMeetingState, OperatorNoteState
 from database import Lead, User
 from database.models import Meeting, Comment, Note
 
@@ -98,8 +98,10 @@ async def need_leads_handler(message: Message) -> None:
     leads_to_assign = unassigned_leads[:remaining_quota]
 
     for lead in leads_to_assign:
-        lead.operator_id = operator.id
-        await lead.commit()
+        user = await User.get(lead.user_id)
+        if user.type == User.Type.USER:
+            lead.operator_id = operator.id
+            await lead.commit()
 
     await message.answer(
         f"📅 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"

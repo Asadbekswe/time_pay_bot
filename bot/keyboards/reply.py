@@ -51,8 +51,9 @@ def operator_btn():
 def admin_btn():
     rkb = ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text=AdminButtons.USERS), KeyboardButton(text=AdminButtons.OPERATORS),
-             KeyboardButton(text=AdminButtons.ADMINS), KeyboardButton(text=AdminButtons.SUPER_USER)]],
+            [KeyboardButton(text=AdminButtons.OPERATORS)]],
+        # KeyboardButton(text=AdminButtons.OPERATORS)]
+        # KeyboardButton(text=AdminButtons.ADMINS), KeyboardButton(text=AdminButtons.SUPER_USER)]],
         resize_keyboard=True)
     return rkb
 
