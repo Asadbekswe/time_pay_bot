@@ -9,6 +9,8 @@ class OperatorCommentState(StatesGroup):
     lead_id = State()
     description = State()
     comment = State()
+    reminder_date = State()
+    reminder_time = State()
 
 
 class OperatorMeetingState(StatesGroup):

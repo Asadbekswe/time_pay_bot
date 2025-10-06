@@ -1,4 +1,4 @@
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 
@@ -14,7 +14,6 @@ class OperatorButtons:
     MY_LEADS = "Mening Leadlarim 📌"
     MEETINGS = "Uchrashuvlar ⏰"
     NEED_LEADS = "Lead Kerak 📥"
-    NOTES = "Eslatmalar 📝"
 
 
 class AdminButtons:
@@ -28,10 +27,10 @@ class SuperUserButtons:
     pass
 
 
-class NotesButtons:
-    NOTES = "Eslatmalarim 📝"
-    CREATE_NOTE = "Eslatma yaratish 📅"
-    BACK = "Orqaga qaytish ⬅️"
+# class NotesButtons:
+#     NOTES = "Eslatmalarim 📝"
+#     CREATE_NOTE = "Eslatma yaratish 📅"
+#     BACK = "Orqaga qaytish ⬅️"
 
 
 def request_contact_user():
@@ -43,7 +42,7 @@ def request_contact_user():
 def operator_btn():
     rkb = ReplyKeyboardMarkup(keyboard=[
         [KeyboardButton(text=OperatorButtons.MY_LEADS), KeyboardButton(text=OperatorButtons.MEETINGS),
-         KeyboardButton(text=OperatorButtons.NEED_LEADS), KeyboardButton(text=OperatorButtons.NOTES)]],
+         KeyboardButton(text=OperatorButtons.NEED_LEADS)]],
         resize_keyboard=True)
     return rkb
 
@@ -57,10 +56,9 @@ def admin_btn():
         resize_keyboard=True)
     return rkb
 
-
-def operator_notes_btn():
-    ikb = InlineKeyboardMarkup(
-        inline_keyboard=[[InlineKeyboardButton(text=NotesButtons.NOTES, callback_data=NotesButtons.NOTES),
-                          InlineKeyboardButton(text=NotesButtons.CREATE_NOTE, callback_data=NotesButtons.CREATE_NOTE),
-                          InlineKeyboardButton(text=NotesButtons.BACK, callback_data=NotesButtons.BACK)]])
-    return ikb
+# def operator_notes_btn():
+#     ikb = InlineKeyboardMarkup(
+#         inline_keyboard=[[InlineKeyboardButton(text=NotesButtons.NOTES, callback_data=NotesButtons.NOTES),
+#                           InlineKeyboardButton(text=NotesButtons.CREATE_NOTE, callback_data=NotesButtons.CREATE_NOTE),
+#                           InlineKeyboardButton(text=NotesButtons.BACK, callback_data=NotesButtons.BACK)]])
+#     return ikb

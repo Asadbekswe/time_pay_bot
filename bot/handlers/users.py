@@ -20,7 +20,7 @@ user_router.callback_query.filter(IsUser())
 async def command_start_handler(message: Message, state: FSMContext, command: CommandStart) -> None:
     param = command.args or "telegram"
 
-    lead = await Lead.filter(user_id=message.from_user.id, status=Lead.Status.NEW_LEAD)
+    lead = await Lead.filter(user_id=message.from_user.id, status=Lead.Status.NEW)
 
     if not lead:
         await Lead.create(

@@ -3,8 +3,6 @@ import logging
 from aiogram import Bot
 from aiogram.types import BotCommand
 
-from database import db as database
-
 
 async def on_startup(bot: Bot):
     my_commands = [
