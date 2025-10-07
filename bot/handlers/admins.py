@@ -10,6 +10,7 @@ from openpyxl import Workbook
 from bot.filters.base_filter import IsAdmin, first_id_or_none
 from bot.keyboards.keyboard import operator_list_keyboard, operator_keyboard, statistic_keyboard, OperatorButton
 from bot.keyboards.reply import admin_btn, AdminButtons
+from bot.tasks.task import UZBEK_TZ
 from database import User, Lead
 from database.models import Comment, Meeting
 
@@ -152,7 +153,7 @@ async def all_handler(callback_query: CallbackQuery) -> None:
 @admin_router.callback_query(F.data.startswith("month:"))
 async def month_handler(callback_query: CallbackQuery) -> None:
     operator_id = int(callback_query.data.split(":")[1])
-    now = datetime.now()
+    now = datetime.now(UZBEK_TZ)
 
     start_date = datetime(now.year, now.month, 1)
     if now.month == 12:
@@ -171,7 +172,7 @@ async def month_handler(callback_query: CallbackQuery) -> None:
     wb = Workbook()
     ws = wb.active
     ws.title = "Sotilgan Leadlar"
-    #salom----------------------------------
+    # salom----------------------------------
 
     ws.append(["ID", "User", "Phone", "Tarmoq", ])
 

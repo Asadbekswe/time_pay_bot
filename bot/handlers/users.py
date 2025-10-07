@@ -47,7 +47,7 @@ async def user_request_contact_handler(message: Message, state: FSMContext) -> N
     phone_number = message.contact.phone_number[-9:]
     await state.update_data(phone_number=phone_number)
     await User.update(_id=message.from_user.id, phone_number=phone_number)
-    await message.reply("Tez orada Operatorlarimiz siz bilan Bog'lanishadi ✅ !!!",
+    await message.reply_video("Tez orada Operatorlarimiz siz bilan Bog'lanishadi ✅ !!!",
                         reply_markup=ReplyKeyboardRemove())
 
 
@@ -96,4 +96,4 @@ async def request_admin(message: Message, bot: Bot) -> None:
                 reply_markup=request_operator_keyboard(user_id=user.id),
             )
         except Exception as e:
-            print(f"❌ Xatolik: {e}")
+           print(f"❌ Xatolik: {e}")

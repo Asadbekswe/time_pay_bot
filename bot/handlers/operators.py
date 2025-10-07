@@ -96,18 +96,22 @@ async def need_leads_handler(message: Message) -> None:
         return
 
     leads_to_assign = unassigned_leads[:remaining_quota]
-
+    remaining_quota = 0
     for lead in leads_to_assign:
         user = await User.get(lead.user_id)
         if user.type == User.Type.USER:
             lead.operator_id = operator.id
+            remaining_quota += 1
             await lead.commit()
-
-    await message.answer(
-        f"📅 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
-        f"🎉 {len(leads_to_assign)} ta lead sizga biriktirildi! Endi u Mening Leadlarimda ⬅️\n"
-        f"👤 Operator: {operator.first_name if operator.first_name else ""} {operator.last_name if operator.last_name else ""}"
-    )
+    if remaining_quota != 0:
+        await message.answer(
+            f"📅 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"🎉 {remaining_quota} ta lead sizga biriktirildi! Endi u Mening Leadlarimda ⬅️\n"
+            f"👤 Operator: {operator.first_name if operator.first_name else ""} {operator.last_name if operator.last_name else ""}"
+        )
+    else:
+        await message.answer("📭 Hozircha yangi lead mavjud emas.")
+        return
 
 
 @operator_router.callback_query(F.data.startswith("comment:"))
